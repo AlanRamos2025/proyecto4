@@ -28,6 +28,7 @@ cd Proyecto4
 
 2. Instalar dependencias (backend y frontend):
 ```bash
+<<<<<<< HEAD
 npm install
 ```
 ```bash
@@ -38,6 +39,11 @@ npm install
 cd front 
 npm install
 ```
+=======
+npm run install:all
+```
+
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
 3. Configurar base de datos:
    - Crear base de datos MySQL:
    ```sql
@@ -118,4 +124,8 @@ The React Compiler is currently not compatible with SWC. See [this issue](https:
 
 ## Expanding the ESLint configuration
 
+<<<<<<< HEAD
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+=======
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e

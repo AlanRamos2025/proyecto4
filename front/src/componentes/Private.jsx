@@ -10,16 +10,31 @@ function Private() {
 
   useEffect(() => {
     async function verifyAuth() {
+<<<<<<< HEAD
       if (localStorage.getItem('isLoggingOut') === 'true') {
         localStorage.removeItem('isLoggingOut')
         return
       }
+=======
+      // Si se está en proceso de logout, no hacer nada
+      if (localStorage.getItem('isLoggingOut') === 'true') {
+        // Limpiar el flag después de usarlo para que no interfiera en futuras recargas
+        localStorage.removeItem('isLoggingOut')
+        return
+      }
+      
+      // Si no hay token, redirigir al login
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       if (!user?.token) {
         navigate("/login")
         return
       }
 
       try {
+<<<<<<< HEAD
+=======
+        // Verificar que el token sea válido con el backend
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
         const url = `${import.meta.env.VITE_API_URL}/api/auth/verify-token`
         const config = {
           method: "GET",
@@ -33,6 +48,10 @@ function Private() {
         const res = await req.json()
 
         if (res.error) {
+<<<<<<< HEAD
+=======
+          // Token inválido, cerrar sesión y redirigir al login
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
           setUser({
             full_name: null,
             token: null,
@@ -42,6 +61,11 @@ function Private() {
           navigate("/login")
           return
         }
+<<<<<<< HEAD
+=======
+
+        // Token válido, actualizar datos del usuario si vienen en la respuesta
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
         if (res.user && res.user.fullName) {
           setUser({
             ...user,
@@ -49,6 +73,11 @@ function Private() {
             role: res.user.role || user.role
           })
         }
+<<<<<<< HEAD
+=======
+        
+        // Permitir acceso
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
         setIsVerifying(false)
       } catch (error) {
         console.error('Error verificando token:', error)
@@ -64,6 +93,11 @@ function Private() {
 
     verifyAuth()
   }, [user?.token, navigate, setUser])
+<<<<<<< HEAD
+=======
+
+  // Mientras verifica el token, mostrar indicador de carga
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
   if (isVerifying) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black flex items-center justify-center">

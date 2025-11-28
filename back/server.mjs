@@ -1,5 +1,9 @@
 import express from "express"
+<<<<<<< HEAD
 import dotenv from 'dotenv'
+=======
+import "dotenv/config"
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
 import cors from "cors"
 import { sequelize } from './config/db.mjs'
 import { userRoutes } from "./routes/user.mjs"
@@ -12,8 +16,11 @@ import fs from 'fs'
 const PORT = process.env.PORT ?? 3000
 const app = express()
 
+<<<<<<< HEAD
 dotenv.config()
 
+=======
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
 // Configuración CORS: permitir el frontend en desarrollo (5173 y 5174)
 const allowedOrigins = [
   'http://localhost:5173',

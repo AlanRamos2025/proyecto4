@@ -11,6 +11,10 @@ const Public = () => {
 
   useEffect(() => {
     async function verifyUser() {
+<<<<<<< HEAD
+=======
+      // Si estamos en rutas de autenticación, no verificar token
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       if (location.pathname === '/login' || location.pathname === '/register') {
         setIsVerifying(false)
         return
@@ -62,6 +66,10 @@ const Public = () => {
           setIsVerifying(false)
           return
         }
+<<<<<<< HEAD
+=======
+        // Token válido, actualizar datos del usuario si vienen en la respuesta
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
         if (res.user && res.user.fullName) {
           setUser((prevUser) => ({
             ...prevUser,
@@ -69,6 +77,11 @@ const Public = () => {
             role: res.user.role || prevUser.role
           }))
         }
+<<<<<<< HEAD
+=======
+        
+        // Token válido, permitir acceso a la página pública
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
         setIsVerifying(false)
       } catch (error) {
         setUser({

@@ -13,10 +13,19 @@ const Legend = () => {
 const Login = () => {
   const { setUser } = useStore()
   const navigate = useNavigate()
+<<<<<<< HEAD
+=======
+
+  // Estados
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
+<<<<<<< HEAD
+=======
+  // Funciones
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -38,6 +47,11 @@ const Login = () => {
 
       const req = await fetch(url, config)
       const res = await req.json()
+<<<<<<< HEAD
+=======
+
+      // Si el backend indica error en el body, mostrar mensaje aunque el status sea 200
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       if (res?.error) {
         toast.error(res.msg || res.message || 'Error al iniciar sesión')
         return
@@ -56,6 +70,10 @@ const Login = () => {
         role: res.user?.role || 'user'
       })
       toast.success("Sesión iniciada")
+<<<<<<< HEAD
+=======
+      // Redirigir a productos
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       navigate('/private/productos')
 
     } catch (error) {

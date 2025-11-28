@@ -28,13 +28,17 @@ const Cart = () => {
 
     try {
       const items = cart.map(i => ({ id: i.id, quantity: i.quantity }))
+<<<<<<< HEAD
       
+=======
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       const res = await fetch(`${API_BASE_URL}/api/cart/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.token}`
         },
+<<<<<<< HEAD
         body: JSON.stringify({ 
           items,
           sendEmail: true
@@ -43,6 +47,12 @@ const Cart = () => {
 
       const contentType = res.headers.get('content-type') || ''
       
+=======
+        body: JSON.stringify({ items })
+      })
+
+      const contentType = res.headers.get('content-type') || ''
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       if (res.ok && contentType.includes('text/csv')) {
         const blob = await res.blob()
         const url = window.URL.createObjectURL(blob)
@@ -59,6 +69,7 @@ const Cart = () => {
         a.remove()
         window.URL.revokeObjectURL(url)
 
+<<<<<<< HEAD
         // Notificación emergente mejorada con detalles
         const productNames = cart.slice(0, 2).map(item => item.name).join(', ')
         const moreProducts = cart.length > 2 ? ` y ${cart.length - 2} más` : ''
@@ -98,6 +109,12 @@ const Cart = () => {
           window.dispatchEvent(new Event('stock-updated'))
         }, 100)
         
+=======
+        toast.success('Compra exitosa — ticket descargado')
+        clearCart()
+        navigate('/private/productos')
+        setTimeout(() => window.location.reload(), 600)
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
         return
       }
 
@@ -108,6 +125,7 @@ const Cart = () => {
         return
       }
 
+<<<<<<< HEAD
       // Notificación de éxito alternativa (si el backend retorna JSON)
       const productNames = cart.slice(0, 2).map(item => item.name).join(', ')
       const moreProducts = cart.length > 2 ? ` y ${cart.length - 2} más` : ''
@@ -145,6 +163,12 @@ const Cart = () => {
       setTimeout(() => {
         window.dispatchEvent(new Event('stock-updated'))
       }, 100)
+=======
+      toast.success(data.msg || 'Compra exitosa')
+      clearCart()
+      navigate('/private/productos')
+      setTimeout(() => window.location.reload(), 600)
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
     } catch (err) {
       console.error(err)
       toast.error('Error al procesar el pago')
@@ -167,6 +191,7 @@ const Cart = () => {
                 <div className="text-sm text-gray-300">${item.price}</div>
               </div>
               <div className="flex items-center gap-2">
+<<<<<<< HEAD
                 <input 
                   type="number" 
                   min="1" 
@@ -180,11 +205,16 @@ const Cart = () => {
                 >
                   Quitar
                 </button>
+=======
+                <input type="number" min="1" value={item.quantity} onChange={(e) => updateQuantity(item.id, Math.max(1, Number(e.target.value)))} className="w-20 px-2 py-1 rounded bg-white/10 text-white" />
+                <button onClick={() => removeFromCart(item.id)} className="px-3 py-1 bg-red-600 text-white rounded">Quitar</button>
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
               </div>
             </div>
           ))}
 
           <div className="flex justify-between items-center pt-4 border-t border-white/10">
+<<<<<<< HEAD
             <div className="text-white font-bold">Total: ${total.toFixed(2)}</div>
             <div className="flex gap-2">
               <button 
@@ -200,6 +230,12 @@ const Cart = () => {
               >
                 {loading ? 'Procesando...' : 'Pagar'}
               </button>
+=======
+            <div className="text-white font-bold">Total: ${total}</div>
+            <div className="flex gap-2">
+              <button onClick={() => clearCart()} className="px-4 py-2 bg-gray-600 text-white rounded">Vaciar</button>
+              <button onClick={handlePay} disabled={loading} className="px-4 py-2 bg-green-600 text-white rounded">{loading ? 'Procesando...' : 'Pagar'}</button>
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
             </div>
           </div>
         </div>
@@ -208,4 +244,8 @@ const Cart = () => {
   )
 }
 
+<<<<<<< HEAD
 export default Cart
+=======
+export default Cart
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e

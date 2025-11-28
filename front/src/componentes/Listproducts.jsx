@@ -1,5 +1,9 @@
 import { Link } from 'react-router-dom';
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
+=======
+import { useState, useEffect, useCallback } from 'react';
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
 import { useStore } from '../store/useStore';
 import { Loader2, Trash2, Plus, Edit } from 'lucide-react';
 
@@ -41,16 +45,33 @@ const Listproducts = () => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+<<<<<<< HEAD
   const { user, addToCart } = useStore(); 
+=======
+  const { user, addToCart } = useStore();
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
+<<<<<<< HEAD
   const isPrivileged = user && (user.role === 'admin' || user.role === 'employee');
   const isUser = user && user.role === 'user';
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const fetchProductos = async () => {
+=======
+  const isPrivileged = user && (user.role === 'admin' || user.role === 'employee')
+  const isUser = user && user.role === 'user'
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+  // Depuración: mostrar la variable de entorno y la URL base usada
+  console.debug('VITE_API_URL (Listproducts):', import.meta.env.VITE_API_URL)
+  console.debug('API_BASE_URL (Listproducts):', API_BASE_URL)
+
+  const fetchProductos = useCallback(async () => {
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
     setLoading(true);
     setError(null);
     
@@ -60,11 +81,16 @@ const Listproducts = () => {
     }
 
     try {
+<<<<<<< HEAD
+=======
+      // Petición GET a la API para obtener todos los productos
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       const response = await fetch(`${API_BASE_URL}/api/products`, { 
         headers,
         method: 'GET'
       });
       
+<<<<<<< HEAD
       if (!response.ok) {
         throw new Error(`Error ${response.status}: No se pudo obtener la lista de productos.`);
       }
@@ -73,6 +99,20 @@ const Listproducts = () => {
       
       let productosArray = [];
       
+=======
+      // Verificar si la respuesta es exitosa
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: No se pudo conectar a la API.`);
+      }
+
+      const data = await response.json();
+      // Procesar la respuesta de la API
+      
+      // Intentar extraer el array de productos del formato esperado
+      let productosArray = [];
+      
+      // El backend devuelve { error: false, data: [...] }
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       if (data.data && Array.isArray(data.data)) {
         productosArray = data.data;
       } else if (Array.isArray(data)) {
@@ -82,20 +122,34 @@ const Listproducts = () => {
       } else if (data.productos && Array.isArray(data.productos)) {
         productosArray = data.productos;
       } else {
+<<<<<<< HEAD
         console.warn('Formato inesperado de respuesta de la API:', data);
         productosArray = [];
       }
       
+=======
+        // Registrar advertencia si el formato de respuesta es inesperado
+        console.warn('Formato inesperado de respuesta:', data);
+        productosArray = [];
+      }
+      
+      // Actualizar productos
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       setProductos(productosArray);
       setError(null);
       
     } catch (error) {
+<<<<<<< HEAD
       console.error('Error completo en fetchProductos:', error);
+=======
+      console.error('Error completo:', error);
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       setError(error.message);
       setProductos([]);
     } finally {
       setLoading(false);
     }
+<<<<<<< HEAD
   };
   useEffect(() => {
     fetchProductos();
@@ -112,6 +166,14 @@ const Listproducts = () => {
       window.removeEventListener('stock-updated', handleStockUpdate);
     };
   }, [user]);
+=======
+  }, [user, API_BASE_URL]);
+
+  useEffect(() => {
+    fetchProductos();
+  }, [fetchProductos]);
+
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
   const handleEliminarClick = (producto) => {
     setProductToDelete(producto);
     setShowDeleteModal(true);
@@ -129,11 +191,20 @@ const Listproducts = () => {
       });
 
       if (!response.ok) {
+<<<<<<< HEAD
         throw new Error('No se pudo eliminar el producto. Verifica tus permisos.');
       }
       fetchProductos(); 
     } catch (error) {
       console.error('Error al eliminar:', error);
+=======
+        throw new Error('No se pudo eliminar el producto.');
+      }
+
+      fetchProductos();
+    } catch (error) {
+      console.error('Error:', error);
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       setError(error.message);
     } finally {
       setShowDeleteModal(false);
@@ -170,7 +241,10 @@ const Listproducts = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-white">Productos</h1>
         
+<<<<<<< HEAD
         {/* Botón para crear nuevo producto, solo para usuarios privilegiados */}
+=======
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
         {isPrivileged && (
           <Link 
             to="/private/productos/nuevo"
@@ -182,7 +256,11 @@ const Listproducts = () => {
         )}
       </div>
 
+<<<<<<< HEAD
       {productos.length === 0 ? (
+=======
+          {productos.length === 0 ? (
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
         <div className="mt-8 bg-white/5 p-8 rounded-xl text-center border border-white/10">
           <p className="text-white text-lg mb-4">No hay productos cargados en la base de datos.</p>
           {isPrivileged && (
@@ -194,6 +272,7 @@ const Listproducts = () => {
             </Link>
           )}
         </div>
+<<<<<<< HEAD
       ) : (
         <div className="grid gap-4">
           {productos.map(producto => (
@@ -203,6 +282,13 @@ const Listproducts = () => {
             >
               <div className="mb-3 sm:mb-0 flex items-center gap-4">
                 {/* Imagen del producto */}
+=======
+          ) : (
+        <div className="grid gap-4">
+          {productos.map(producto => (
+            <div key={producto.id} className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+              <div className="mb-3 sm:mb-0 flex items-center gap-4">
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
                 {producto.image ? (
                   <img src={`${API_BASE_URL.replace(/\/$/, '')}/images/${producto.image}`} alt={producto.name} className="w-20 h-20 object-cover rounded-md border border-white/10" />
                 ) : (
@@ -211,6 +297,7 @@ const Listproducts = () => {
                 <div>
                   <h3 className="text-white font-semibold text-lg">{producto.name}</h3>
                   <p className="text-white mt-2 font-mono">
+<<<<<<< HEAD
                     Stock: <span className={producto.stock <= 5 ? 'text-red-400 font-bold' : ''}>{producto.stock}</span> | Precio: ${producto.price}
                   </p>
                 </div>
@@ -251,12 +338,48 @@ const Listproducts = () => {
                   </div>
                 ) : null
               )}
+=======
+                    Stock: {producto.stock} | Precio: ${producto.price}
+                  </p>
+                </div>
+              </div>
+                  {isPrivileged ? (
+                    <div className="flex gap-3 w-full sm:w-auto">
+                      <Link 
+                        to={`/private/productos/editar/${producto.id}`}
+                        className="w-1/2 sm:w-auto text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium flex items-center justify-center gap-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Editar
+                      </Link>
+                      <button 
+                        onClick={() => handleEliminarClick(producto)}
+                        className="w-1/2 sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all flex items-center justify-center gap-1 font-medium"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Eliminar
+                      </button>
+                    </div>
+                  ) : (
+                    // Mostrar botón de "Agregar al carrito" sólo a usuarios autenticados con rol 'user'
+                    isUser ? (
+                      <div className="flex gap-3 w-full sm:w-auto">
+                        <button onClick={() => addToCart(producto)} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-medium">
+                          Agregar al carrito
+                        </button>
+                      </div>
+                    ) : null
+                  )}
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
             </div>
           ))}
         </div>
       )}
 
+<<<<<<< HEAD
       {/* Modal de Confirmación de Eliminación */}
+=======
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       <DeleteConfirmationModal
         show={showDeleteModal}
         onConfirm={eliminarProductoConfirmado}

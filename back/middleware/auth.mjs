@@ -46,6 +46,12 @@ export const requireRole = (...roles) => {
     next()
   }
 }
+<<<<<<< HEAD
+=======
+
+// Función reutilizable para verificar token desde código (no middleware).
+// Devuelve el payload si el token es válido, o null si no lo es.
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
 export const verifyTokenSilently = (req) => {
   try {
     const auth = req.headers.authorization

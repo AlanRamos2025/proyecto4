@@ -12,15 +12,28 @@ const Legend = () => {
 
 
 const Register = () => {
+<<<<<<< HEAD
+=======
+  // Estados del formulario
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
+<<<<<<< HEAD
+=======
+
+  // Manejar envío del formulario de registro
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
+<<<<<<< HEAD
+=======
+      // Validación en el cliente
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
       if (!fullName || !email || !password || !confirmPassword) {
         toast.error('Complete todos los campos')
         setLoading(false)

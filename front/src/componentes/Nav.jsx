@@ -7,14 +7,29 @@ const Nav = () => {
   const navigate = useNavigate()
 
   const handleLogout = () => {
+<<<<<<< HEAD
     localStorage.setItem('isLoggingOut', 'true')
     localStorage.removeItem('token_login_web')
+=======
+    // Marcar que se está en proceso de logout para evitar redirecciones en Private.jsx
+    localStorage.setItem('isLoggingOut', 'true')
+    
+    // Limpiar el estado del usuario en localStorage (Zustand persiste aquí)
+    localStorage.removeItem('token_login_web')
+    
+    // Limpiar también el estado en memoria
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
     setUser({
       full_name: null,
       token: null,
       email: null,
       role: null
     })
+<<<<<<< HEAD
+=======
+    
+    // Redirigir inmediatamente con window.location.assign
+>>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
     const frontUrl = import.meta.env.VITE_FRONT_URL || 'http://localhost:5174/'
     window.location.assign(frontUrl)
   }
