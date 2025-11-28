@@ -38,9 +38,6 @@ npm install
 cd front 
 npm install
 ```
-=======
-npm run install:all
-```
 3. Configurar base de datos:
    - Crear base de datos MySQL:
    ```sql
