@@ -102,7 +102,6 @@ La aplicación estará disponible en:
 - Mejor manejo de errores de conexión
 - Documentación mejorada para solución de problemas comunes
 - Frontend más robusto con mejor manejo de errores API
-=======
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
@@ -118,8 +117,5 @@ The React Compiler is currently not compatible with SWC. See [this issue](https:
 
 ## Expanding the ESLint configuration
 
-<<<<<<< HEAD
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
->>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
