@@ -28,7 +28,6 @@ cd Proyecto4
 
 2. Instalar dependencias (backend y frontend):
 ```bash
-<<<<<<< HEAD
 npm install
 ```
 ```bash
@@ -42,8 +41,6 @@ npm install
 =======
 npm run install:all
 ```
-
->>>>>>> bf7f94b30ee0b846e594836f1669bed8531cc32e
 3. Configurar base de datos:
    - Crear base de datos MySQL:
    ```sql
