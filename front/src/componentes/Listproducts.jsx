@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { Loader2, Trash2, Plus, Edit, Package, ShoppingCart } from 'lucide-react';
+import { Loader2, Trash2, Plus, Edit } from 'lucide-react';
 
 const DeleteConfirmationModal = ({ show, onConfirm, onCancel, productName }) => {
   if (!show) return null;
@@ -41,20 +41,16 @@ const Listproducts = () => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user, addToCart } = useStore();
+  const { user, addToCart } = useStore(); 
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  const isPrivileged = user && (user.role === 'admin' || user.role === 'employee')
-  const isUser = user && user.role === 'user'
+  const isPrivileged = user && (user.role === 'admin' || user.role === 'employee');
+  const isUser = user && user.role === 'user';
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
-  console.debug('VITE_API_URL (Listproducts):', import.meta.env.VITE_API_URL)
-  console.debug('API_BASE_URL (Listproducts):', API_BASE_URL)
-
-  const fetchProductos = useCallback(async () => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  const fetchProductos = async () => {
     setLoading(true);
     setError(null);
     
@@ -70,7 +66,7 @@ const Listproducts = () => {
       });
       
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: No se pudo conectar a la API.`);
+        throw new Error(`Error ${response.status}: No se pudo obtener la lista de productos.`);
       }
 
       const data = await response.json();
@@ -86,7 +82,7 @@ const Listproducts = () => {
       } else if (data.productos && Array.isArray(data.productos)) {
         productosArray = data.productos;
       } else {
-        console.warn('Formato inesperado de respuesta:', data);
+        console.warn('Formato inesperado de respuesta de la API:', data);
         productosArray = [];
       }
       
@@ -94,18 +90,28 @@ const Listproducts = () => {
       setError(null);
       
     } catch (error) {
-      console.error('Error completo:', error);
+      console.error('Error completo en fetchProductos:', error);
       setError(error.message);
       setProductos([]);
     } finally {
       setLoading(false);
     }
-  }, [user, API_BASE_URL]);
-
+  };
   useEffect(() => {
     fetchProductos();
-  }, [fetchProductos]);
+  }, [user]);
+  useEffect(() => {
+    const handleStockUpdate = () => {
+      console.log('Evento stock-updated recibido, recargando productos...');
+      fetchProductos(); 
+    };
 
+    window.addEventListener('stock-updated', handleStockUpdate);
+
+    return () => {
+      window.removeEventListener('stock-updated', handleStockUpdate);
+    };
+  }, [user]);
   const handleEliminarClick = (producto) => {
     setProductToDelete(producto);
     setShowDeleteModal(true);
@@ -123,12 +129,11 @@ const Listproducts = () => {
       });
 
       if (!response.ok) {
-        throw new Error('No se pudo eliminar el producto.');
+        throw new Error('No se pudo eliminar el producto. Verifica tus permisos.');
       }
-
-      fetchProductos();
+      fetchProductos(); 
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error al eliminar:', error);
       setError(error.message);
     } finally {
       setShowDeleteModal(false);
@@ -165,6 +170,7 @@ const Listproducts = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-white">Productos</h1>
         
+        {/* Botón para crear nuevo producto, solo para usuarios privilegiados */}
         {isPrivileged && (
           <Link 
             to="/private/productos/nuevo"
@@ -178,7 +184,6 @@ const Listproducts = () => {
 
       {productos.length === 0 ? (
         <div className="mt-8 bg-white/5 p-8 rounded-xl text-center border border-white/10">
-          <Package className="w-16 h-16 text-purple-300/50 mx-auto mb-4" />
           <p className="text-white text-lg mb-4">No hay productos cargados en la base de datos.</p>
           {isPrivileged && (
             <Link
@@ -190,90 +195,68 @@ const Listproducts = () => {
           )}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4">
           {productos.map(producto => (
             <div 
               key={producto.id} 
-              className="bg-white/10 backdrop-blur-xl rounded-xl overflow-hidden border border-white/20 hover:border-purple-500/50 transition-all group"
+              className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20 flex flex-col sm:flex-row justify-between items-start sm:items-center"
             >
-              {/* Imagen del producto */}
-              <div className="relative h-48 bg-gradient-to-br from-purple-500/20 to-pink-500/20 overflow-hidden">
+              <div className="mb-3 sm:mb-0 flex items-center gap-4">
+                {/* Imagen del producto */}
                 {producto.image ? (
-                  <img 
-                    src={producto.image} 
-                    alt={producto.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                  <img src={`${API_BASE_URL.replace(/\/$/, '')}/images/${producto.image}`} alt={producto.name} className="w-20 h-20 object-cover rounded-md border border-white/10" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package className="w-16 h-16 text-purple-300/50" />
-                  </div>
+                  <div className="w-20 h-20 bg-white/5 rounded-md flex items-center justify-center text-sm text-white/70">No image</div>
                 )}
-                
-                {/* Badge de stock */}
-                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full">
-                  <span className="text-white text-sm font-semibold">
-                    Stock: {producto.stock}
-                  </span>
+                <div>
+                  <h3 className="text-white font-semibold text-lg">{producto.name}</h3>
+                  <p className="text-white mt-2 font-mono">
+                    Stock: <span className={producto.stock <= 5 ? 'text-red-400 font-bold' : ''}>{producto.stock}</span> | Precio: ${producto.price}
+                  </p>
                 </div>
               </div>
-
-              {/* Información del producto */}
-              <div className="p-4">
-                <h3 className="text-white font-semibold text-lg mb-2 truncate">
-                  {producto.name}
-                </h3>
-                
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-2xl font-bold text-purple-300">
-                    ${producto.price}
-                  </span>
-                  {producto.stock > 0 ? (
-                    <span className="text-green-400 text-sm font-medium">
-                      Disponible
-                    </span>
-                  ) : (
-                    <span className="text-red-400 text-sm font-medium">
-                      Agotado
-                    </span>
-                  )}
+              
+              {/* Acciones por Rol */}
+              {isPrivileged ? (
+                <div className="flex gap-3 w-full sm:w-auto">
+                  <Link 
+                    to={`/private/productos/editar/${producto.id}`}
+                    className="w-1/2 sm:w-auto text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium flex items-center justify-center gap-1"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Editar
+                  </Link>
+                  <button 
+                    onClick={() => handleEliminarClick(producto)}
+                    className="w-1/2 sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all flex items-center justify-center gap-1 font-medium"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Eliminar
+                  </button>
                 </div>
-
-                {/* Botones de acción */}
-                {isPrivileged ? (
-                  <div className="flex gap-2">
-                    <Link 
-                      to={`/private/productos/editar/${producto.id}`}
-                      className="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium flex items-center justify-center gap-2"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Editar
-                    </Link>
-                    <button 
-                      onClick={() => handleEliminarClick(producto)}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all flex items-center justify-center gap-2 font-medium"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  user && (
+              ) : (
+                isUser ? (
+                  <div className="flex gap-3 w-full sm:w-auto">
                     <button 
                       onClick={() => addToCart(producto)} 
                       disabled={producto.stock === 0}
-                      className="w-full px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-green-500/50 transition-all font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={`px-4 py-2 text-white rounded-lg transition-all font-medium ${
+                        producto.stock === 0 
+                          ? 'bg-gray-600 cursor-not-allowed opacity-50' 
+                          : 'bg-green-600 hover:bg-green-700'
+                      }`}
                     >
-                      <ShoppingCart className="w-4 h-4" />
-                      Agregar al carrito
+                      {producto.stock === 0 ? 'Sin Stock' : 'Agregar al carrito'}
                     </button>
-                  )
-                )}
-              </div>
+                  </div>
+                ) : null
+              )}
             </div>
           ))}
         </div>
       )}
 
+      {/* Modal de Confirmación de Eliminación */}
       <DeleteConfirmationModal
         show={showDeleteModal}
         onConfirm={eliminarProductoConfirmado}

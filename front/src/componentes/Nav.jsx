@@ -7,23 +7,14 @@ const Nav = () => {
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    // Marcar que se está en proceso de logout para evitar redirecciones en Private.jsx
     localStorage.setItem('isLoggingOut', 'true')
-    
-    // Limpiar el estado del usuario en localStorage (Zustand persiste aquí)
     localStorage.removeItem('token_login_web')
-    
-    // Limpiar también el estado en memoria
     setUser({
       full_name: null,
       token: null,
       email: null,
       role: null
     })
-    
-    // Redirigir inmediatamente con window.location.assign
-    // Esto causa una recarga completa de la página y evita que Private.jsx navegue a /login
-    // porque ya no habrá token en localStorage
     const frontUrl = import.meta.env.VITE_FRONT_URL || 'http://localhost:5174/'
     window.location.assign(frontUrl)
   }
@@ -67,12 +58,14 @@ const Nav = () => {
                   </Link>
                 )}
 
-                <Link
-                  to="/private/cart"
-                  className="px-4 py-2 text-white hover:text-purple-300 transition-colors font-medium"
-                >
-                  Carrito
-                </Link>
+                {user.role !== 'admin' && (
+                  <Link
+                    to="/private/cart"
+                    className="px-4 py-2 text-white hover:text-purple-300 transition-colors font-medium"
+                  >
+                    Carrito
+                  </Link>
+                )}
 
                 <button
                   onClick={handleLogout}

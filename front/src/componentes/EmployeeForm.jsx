@@ -54,7 +54,6 @@ const EmployeeForm = () => {
       }
 
       toast.success('Empleado creado correctamente')
-      // Opcional: redirigir a listado de productos o limpiar el formulario
       navigate('/private/productos')
     } catch (err) {
       console.error(err)

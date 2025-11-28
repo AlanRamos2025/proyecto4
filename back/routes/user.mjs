@@ -5,8 +5,6 @@ import jwt from 'jsonwebtoken'
 import { verifyToken, requireRole } from '../middleware/auth.mjs'
 
 export const userRoutes = Router()
-
-// Obtener todos los usuarios (protegido)
 userRoutes.get("/users", verifyToken, async (req, res) => {
   try {
     const users = await User.findAll({
@@ -25,10 +23,13 @@ userRoutes.get("/users", verifyToken, async (req, res) => {
   }
 })
 
-// Registro de usuario
 userRoutes.post("/register", async (req, res) => {
   try {
     const { fullName, email, password, confirmPassword } = req.body
+    const existing = await User.findOne({ where: { email } })
+    if (existing) {
+      return res.json({ error: true, msg: 'El email ya está en uso' })
+    }
     
     if (password !== confirmPassword) {
       return res.status(403).json({
@@ -40,8 +41,6 @@ userRoutes.post("/register", async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hash = await bcrypt.hash(password, salt)
     const activateToken = "123"
-
-    // Si no hay usuarios en la tabla, el primer usuario será admin
     const usersCount = await User.count()
     const role = usersCount === 0 ? 'admin' : 'user'
 
@@ -54,8 +53,6 @@ userRoutes.post("/register", async (req, res) => {
     })
 
     await user.save()
-
-    // Mensaje diferente si el primer usuario es admin
     const successMsg = role === 'admin' ? 'Admin creado exitosamente' : 'Usuario creado exitosamente'
 
     res.json({
@@ -71,7 +68,6 @@ userRoutes.post("/register", async (req, res) => {
   }
 })
 
-// Crear empleado (solo admin)
 userRoutes.post('/users/employee', verifyToken, requireRole('admin'), async (req, res) => {
   try {
     const { fullName, email, password, confirmPassword } = req.body
@@ -101,7 +97,6 @@ userRoutes.post('/users/employee', verifyToken, requireRole('admin'), async (req
   }
 })
 
-// Login
 userRoutes.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body
@@ -111,7 +106,7 @@ userRoutes.post("/login", async (req, res) => {
     })
 
     if (!user) {
-      return res.status(404).json({
+      return res.json({
         error: true,
         msg: "El usuario no existe"
       })
@@ -120,7 +115,7 @@ userRoutes.post("/login", async (req, res) => {
     const checkPasswd = await bcrypt.compare(password, user.hash)
 
     if (!checkPasswd) {
-      return res.status(403).json({
+      return res.json({
         error: true,
         msg: "Contraseña incorrecta"
       })
@@ -135,7 +130,6 @@ userRoutes.post("/login", async (req, res) => {
     const secret = process.env.JWT_SECRET || 'changeme'
     const token = jwt.sign(payload, secret)
 
-    // Devolver token sin el prefijo 'Bearer' para que el frontend lo almacene limpio
     res.json({
       error: false,
       token,
@@ -154,29 +148,6 @@ userRoutes.post("/login", async (req, res) => {
   }
 })
 
-// Verificar token
-userRoutes.get("/verify-token", async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization
-    
-    if (!authHeader) {
-      return res.json({ error: true })
-    }
-    
-  const token = authHeader.split(" ")[1]
-  const secret = process.env.JWT_SECRET || 'changeme'
-  const verify = jwt.verify(token, secret)
-
-    if (!verify) {
-      return res.json({ error: true })
-    }
-
-    res.json({
-      error: false,
-      user: verify
-    })
-    
-  } catch (error) {
-    res.json({ error: true })
-  }
+userRoutes.get("/verify-token", verifyToken, (req, res) => {
+  return res.json({ error: false, user: req.user })
 })

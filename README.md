@@ -22,15 +22,22 @@ Aplicación full-stack para gestión de productos con autenticación de usuarios
 
 1. Clonar el repositorio:
 ```bash
-git clone https://github.com/GinoGregoret/Proyecto4.git
+git clone https://github.com/AlanRamos2025/proyecto4
 cd Proyecto4
 ```
 
 2. Instalar dependencias (backend y frontend):
 ```bash
-npm run install:all
+npm install
 ```
-
+```bash
+cd back
+npm install
+```
+```bash
+cd front 
+npm install
+```
 3. Configurar base de datos:
    - Crear base de datos MySQL:
    ```sql

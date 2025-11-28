@@ -10,21 +10,16 @@ function Private() {
 
   useEffect(() => {
     async function verifyAuth() {
-      // Si se está en proceso de logout, no hacer nada
       if (localStorage.getItem('isLoggingOut') === 'true') {
-        // Limpiar el flag después de usarlo para que no interfiera en futuras recargas
         localStorage.removeItem('isLoggingOut')
         return
       }
-      
-      // Si no hay token, redirigir al login
       if (!user?.token) {
         navigate("/login")
         return
       }
 
       try {
-        // Verificar que el token sea válido con el backend
         const url = `${import.meta.env.VITE_API_URL}/api/auth/verify-token`
         const config = {
           method: "GET",
@@ -38,7 +33,6 @@ function Private() {
         const res = await req.json()
 
         if (res.error) {
-          // Token inválido, cerrar sesión y redirigir al login
           setUser({
             full_name: null,
             token: null,
@@ -48,8 +42,6 @@ function Private() {
           navigate("/login")
           return
         }
-
-        // Token válido, actualizar datos del usuario si vienen en la respuesta
         if (res.user && res.user.fullName) {
           setUser({
             ...user,
@@ -57,8 +49,6 @@ function Private() {
             role: res.user.role || user.role
           })
         }
-        
-        // Permitir acceso
         setIsVerifying(false)
       } catch (error) {
         console.error('Error verificando token:', error)
@@ -74,8 +64,6 @@ function Private() {
 
     verifyAuth()
   }, [user?.token, navigate, setUser])
-
-  // Mientras verifica el token, mostrar indicador de carga
   if (isVerifying) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black flex items-center justify-center">

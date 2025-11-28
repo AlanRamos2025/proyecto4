@@ -13,13 +13,10 @@ const Legend = () => {
 const Login = () => {
   const { setUser } = useStore()
   const navigate = useNavigate()
-
-  // Estados
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
-  // Funciones
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -29,7 +26,8 @@ const Login = () => {
         email,
         password
       }
-      const url = `${import.meta.env.VITE_API_URL}/api/auth/login`
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+      const url = `${API_BASE.replace(/\/$/, '')}/api/auth/login`
       const config = {
         method: "POST",
         headers: {
@@ -40,9 +38,13 @@ const Login = () => {
 
       const req = await fetch(url, config)
       const res = await req.json()
+      if (res?.error) {
+        toast.error(res.msg || res.message || 'Error al iniciar sesión')
+        return
+      }
 
       if (!req.ok) {
-        toast.error(res.message)
+        toast.error(res.msg || res.message || 'Error al iniciar sesión')
         return
       }
 
@@ -54,7 +56,6 @@ const Login = () => {
         role: res.user?.role || 'user'
       })
       toast.success("Sesión iniciada")
-      // Redirigir a productos
       navigate('/private/productos')
 
     } catch (error) {

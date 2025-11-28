@@ -11,15 +11,12 @@ const Public = () => {
 
   useEffect(() => {
     async function verifyUser() {
-      // Si estamos en rutas de autenticación, no verificar token
       if (location.pathname === '/login' || location.pathname === '/register') {
         setIsVerifying(false)
         return
       }
 
       if (!user?.token) {
-        // Sin token, limpiar estado y permitir acceso a rutas públicas
-        // (esto asegura que el estado esté limpio después de logout)
         setUser({
           full_name: null,
           token: null,
@@ -41,8 +38,7 @@ const Public = () => {
         }
 
         const req = await fetch(url, config)
-        
-        // Si hay error de conexión o respuesta no es OK
+
         if (!req.ok) {
           setUser({
             full_name: null,
@@ -66,8 +62,6 @@ const Public = () => {
           setIsVerifying(false)
           return
         }
-
-        // Token válido, actualizar datos del usuario si vienen en la respuesta
         if (res.user && res.user.fullName) {
           setUser((prevUser) => ({
             ...prevUser,
@@ -75,8 +69,6 @@ const Public = () => {
             role: res.user.role || prevUser.role
           }))
         }
-        
-        // Token válido, permitir acceso a la página pública
         setIsVerifying(false)
       } catch (error) {
         setUser({

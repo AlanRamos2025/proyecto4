@@ -1,15 +1,18 @@
 import express from "express"
-import "dotenv/config"
+import dotenv from 'dotenv'
 import cors from "cors"
 import { sequelize } from './config/db.mjs'
 import { userRoutes } from "./routes/user.mjs"
 import { productRoutes } from "./routes/product.mjs"
+import { cartRoutes } from "./routes/cart.mjs"
 // Servir imágenes de productos desde la carpeta product_imagenes
 import path from 'path'
 import fs from 'fs'
 
 const PORT = process.env.PORT ?? 3000
 const app = express()
+
+dotenv.config()
 
 // Configuración CORS: permitir el frontend en desarrollo (5173 y 5174)
 const allowedOrigins = [
@@ -46,6 +49,8 @@ app.use("/api/auth", userRoutes)
 
 // Rutas de productos
 app.use("/api/products", productRoutes)
+// Rutas de carrito
+app.use('/api/cart', cartRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'API backend funcionando. Rutas: /api/auth, /api/products' })

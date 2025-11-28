@@ -1,69 +1,64 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { Save, X, Loader2, ArrowLeft, Upload, Trash2 } from 'lucide-react'
+import { Loader2, ArrowLeft } from 'lucide-react'
 import { toast } from 'react-toastify'
+import { Input } from './Input'
+import { Button } from './Button'
 
 const Formproducts = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useStore()
-  const [loading, setLoading] = useState(false)
-  const [fetching, setFetching] = useState(false)
-  const [imagePreview, setImagePreview] = useState(null)
-  const [imageFile, setImageFile] = useState(null)
-  const [originalData, setOriginalData] = useState({
-    name: '',
-    price: '',
-    stock: '',
-    image: ''
-  })
   const [formData, setFormData] = useState({
     name: '',
     price: '',
     stock: ''
   })
-
+  const [imageFile, setImageFile] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(false)
+  const [originalData, setOriginalData] = useState(null)
   useEffect(() => {
-    if (id) {
-      fetchProducto()
-    }
+    if (id) fetchProduct()
   }, [id])
 
-  const fetchProducto = async () => {
+  useEffect(() => {
+    return () => {
+      if (previewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    }
+  }, [previewUrl])
+
+  const fetchProduct = async () => {
     setFetching(true)
     try {
-      const url = `${import.meta.env.VITE_API_URL}/api/products/${id}`
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${user.token}`
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/products/${id}`,
+        {
+          headers: { 'Authorization': `Bearer ${user.token}` }
         }
-      })
+      )
       
-      if (!response.ok) {
-        throw new Error('No se pudo cargar el producto')
-      }
+      if (!response.ok) throw new Error('No se pudo cargar el producto')
 
       const data = await response.json()
-      const producto = data.product || data
+      const product = data.product || data
       
-      const datosProducto = {
-        name: producto.name || '',
-        price: producto.price || '',
-        stock: producto.stock || '',
-        image: producto.image || ''
+      const productData = {
+        name: product.name || '',
+        price: product.price || '',
+        stock: product.stock || ''
       }
       
-      setOriginalData(datosProducto)
-      setFormData({
-        name: datosProducto.name,
-        price: datosProducto.price,
-        stock: datosProducto.stock
-      })
+      setFormData(productData)
+      setOriginalData(productData)
       
-      // Si hay imagen existente, mostrarla
-      if (datosProducto.image) {
-        setImagePreview(datosProducto.image)
+      if (product.image) {
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+        setPreviewUrl(`${baseUrl.replace(/\/$/, '')}/images/${product.image}`)
       }
     } catch (error) {
       console.error('Error al cargar producto:', error)
@@ -74,99 +69,94 @@ const Formproducts = () => {
     }
   }
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
+  const hasChanges = () => {
+    if (!id || !originalData) return true
     
-    if (file) {
-      // Validar tipo de archivo
-      if (!file.type.startsWith('image/')) {
-        toast.error('Por favor selecciona un archivo de imagen válido')
-        return
-      }
-      
-      // Validar tamaño (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('La imagen no debe superar los 5MB')
-        return
-      }
-      
-      setImageFile(file)
-      
-      // Crear preview
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result)
-      }
-      reader.readAsDataURL(file)
-    }
+    return (
+      formData.name !== originalData.name ||
+      formData.price !== originalData.price ||
+      formData.stock !== originalData.stock ||
+      imageFile !== null
+    )
   }
 
-  const handleRemoveImage = () => {
-    setImageFile(null)
-    setImagePreview(null)
+  const validateForm = () => {
+    if (!id && !imageFile) {
+      toast.error('Debe seleccionar una imagen para el producto')
+      return false
+    }
+    if (id && !hasChanges()) {
+      toast.info('No hay cambios para guardar')
+      return false
+    }
+
+    return true
+  }
+
+  const createFormData = () => {
+    const fd = new FormData()
+    fd.append('name', formData.name)
+    fd.append('price', parseFloat(formData.price))
+    fd.append('stock', parseInt(formData.stock))
+    if (imageFile) fd.append('image', imageFile)
+    return fd
+  }
+
+  const createProduct = async () => {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/products`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${user.token}` },
+        body: createFormData()
+      }
+    )
+    return response.json()
+  }
+
+  const updateProduct = async () => {
+    const url = `${import.meta.env.VITE_API_URL}/api/products/${id}`
+    if (imageFile) {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${user.token}` },
+        body: createFormData()
+      })
+      return response.json()
+    }
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${user.token}`
+      },
+      body: JSON.stringify({
+        name: formData.name,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock)
+      })
+    })
+    return response.json()
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    if (!validateForm()) return
+
     setLoading(true)
     
     try {
-      // Si estamos en modo edición, verificar si hay cambios
-      if (id) {
-        const hayChanges = 
-          formData.name !== originalData.name ||
-          formData.price !== originalData.price ||
-          formData.stock !== originalData.stock ||
-          imageFile !== null ||
-          (imagePreview === null && originalData.image !== '')
-        
-        if (!hayChanges) {
-          toast.info('No hay cambios para guardar')
-          setLoading(false)
-          return
-        }
-      }
+      const data = id ? await updateProduct() : await createProduct()
 
-      const url = id 
-        ? `${import.meta.env.VITE_API_URL}/api/products/${id}`
-        : `${import.meta.env.VITE_API_URL}/api/products`
-      
-      // Usar FormData para enviar la imagen
-      const formDataToSend = new FormData()
-      formDataToSend.append('name', formData.name)
-      formDataToSend.append('price', parseFloat(formData.price))
-      formDataToSend.append('stock', parseInt(formData.stock))
-      
-      // Si hay una nueva imagen, agregarla
-      if (imageFile) {
-        formDataToSend.append('image', imageFile)
-      }
-      
-      // Si se eliminó la imagen (preview es null pero había imagen original)
-      if (imagePreview === null && originalData.image) {
-        formDataToSend.append('removeImage', 'true')
-      }
-      
-      const response = await fetch(url, {
-        method: id ? 'PUT' : 'POST',
-        headers: {
-          'Authorization': `Bearer ${user.token}`
-          // NO incluir Content-Type cuando se usa FormData
-        },
-        body: formDataToSend
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        if (response.status === 409) {
-          throw new Error(data.msg || 'Ya existe un producto con ese nombre')
-        }
+      if (data?.error) {
         throw new Error(data.msg || 'Error al guardar el producto')
       }
 
       toast.success(id ? 'Producto actualizado correctamente' : 'Producto creado correctamente')
       navigate('/private/productos')
+      
     } catch (error) {
       if (!error.message.includes('Ya existe un producto')) {
         console.error('Error inesperado:', error)
@@ -178,10 +168,25 @@ const Formproducts = () => {
   }
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [e.target.name]: e.target.value
-    })
+    }))
+  }
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0] ?? null
+    if (previewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl)
+    }
+    
+    if (file) {
+      setImageFile(file)
+      setPreviewUrl(URL.createObjectURL(file))
+    } else {
+      setImageFile(null)
+      setPreviewUrl(null)
+    }
   }
 
   if (fetching) {
@@ -199,13 +204,17 @@ const Formproducts = () => {
     <div className="max-w-2xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
-        <button
+        <Button
+          type="button"
           onClick={() => navigate('/private/productos')}
-          className="flex items-center gap-2 text-purple-300 hover:text-white transition-colors mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver a productos
-        </button>
+          className="w-auto inline-flex items-center gap-2 px-0 py-0 text-purple-300 hover:text-white transition-colors mb-4 bg-transparent shadow-none transform-none"
+          value={(
+            <>
+              <ArrowLeft className="w-4 h-4" />
+              <span>Volver a productos</span>
+            </>
+          )}
+        />
         <h1 className="text-3xl font-bold text-white">
           {id ? 'Editar Producto' : 'Nuevo Producto'}
         </h1>
@@ -213,132 +222,97 @@ const Formproducts = () => {
 
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 space-y-6">
-        {/* Sección de Imagen */}
+        
+        {/* Imagen */}
         <div>
           <label className="block text-purple-200 mb-2 font-medium">
-            Imagen del Producto
+            Imagen del producto {!id && <span className="text-red-400">*</span>}
           </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            disabled={loading}
+            className="w-full"
+          />
           
-          {imagePreview ? (
-            <div className="relative">
+          {previewUrl && (
+            <div className="mt-3">
+              <p className="text-sm text-purple-200 mb-2">Vista previa:</p>
               <img 
-                src={imagePreview} 
+                src={previewUrl} 
                 alt="Preview" 
-                className="w-full h-64 object-cover rounded-xl border-2 border-white/20"
+                className="max-w-xs max-h-48 rounded-lg border border-white/20" 
               />
-              <button
-                type="button"
-                onClick={handleRemoveImage}
-                disabled={loading}
-                className="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
             </div>
-          ) : (
-            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-white/30 rounded-xl cursor-pointer bg-white/5 hover:bg-white/10 transition-all">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-12 h-12 text-purple-300 mb-3" />
-                <p className="mb-2 text-sm text-purple-200">
-                  <span className="font-semibold">Click para subir</span> o arrastra y suelta
-                </p>
-                <p className="text-xs text-purple-300/70">PNG, JPG, GIF (MAX. 5MB)</p>
-              </div>
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageChange}
-                disabled={loading}
-              />
-            </label>
           )}
         </div>
 
         {/* Nombre */}
-        <div>
-          <label className="block text-purple-200 mb-2 font-medium">
-            Nombre del Producto
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="Ej: Laptop HP"
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-            required
-            disabled={loading}
-          />
-        </div>
+        <Input
+          id="name"
+          name="name"
+          title="Nombre del Producto"
+          placeholder="Ej: Laptop HP"
+          value={formData.name}
+          onChange={handleChange}
+          disabled={loading}
+          required
+        />
 
         {/* Precio y Stock */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-purple-200 mb-2 font-medium">
-              Precio ($)
-            </label>
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-              required
-              disabled={loading}
-            />
-          </div>
+          <Input
+            id="price"
+            name="price"
+            type="number"
+            title="Precio ($)"
+            placeholder="0.00"
+            value={formData.price}
+            onChange={handleChange}
+            step="0.01"
+            min="0"
+            disabled={loading}
+            required
+          />
 
-          <div>
-            <label className="block text-purple-200 mb-2 font-medium">
-              Stock (unidades)
-            </label>
-            <input
-              type="number"
-              name="stock"
-              value={formData.stock}
-              onChange={handleChange}
-              placeholder="0"
-              min="0"
-              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-purple-300/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-              required
-              disabled={loading}
-            />
-          </div>
+          <Input
+            id="stock"
+            name="stock"
+            type="number"
+            title="Stock (unidades)"
+            placeholder="0"
+            value={formData.stock}
+            onChange={handleChange}
+            min="0"
+            disabled={loading}
+            required
+          />
         </div>
-
+        
         {/* Botones */}
         <div className="flex flex-col sm:flex-row gap-3 pt-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 py-3 px-6 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-lg hover:shadow-purple-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                {id ? 'Actualizando...' : 'Creando...'}
-              </>
-            ) : (
-              <>
-                <Save className="w-5 h-5" />
-                {id ? 'Actualizar Producto' : 'Crear Producto'}
-              </>
-            )}
-          </button>
+          <div className="flex-1">
+            <Button
+              type="submit"
+              value={
+                loading 
+                  ? (id ? 'Actualizando...' : 'Creando...') 
+                  : (id ? 'Actualizar Producto' : 'Crear Producto')
+              }
+              disabled={loading}
+            />
+          </div>
 
-          <button
-            type="button"
-            onClick={() => navigate('/private/productos')}
-            disabled={loading}
-            className="flex-1 sm:flex-none py-3 px-6 rounded-xl font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            <X className="w-5 h-5" />
-            Cancelar
-          </button>
+          <div className="flex-1 sm:flex-none">
+            <Button
+              type="button"
+              value="Cancelar"
+              onClick={() => navigate('/private/productos')}
+              disabled={loading}
+              className="bg-white/10 text-white"
+            />
+          </div>
         </div>
       </form>
     </div>

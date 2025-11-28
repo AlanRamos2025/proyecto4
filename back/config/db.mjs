@@ -11,7 +11,7 @@ const config = {
     host: process.env.HOST_DB || 'localhost',
     port: process.env.PORT_DB ? Number(process.env.PORT_DB) : 3306,
     dialect: process.env.DIALECT_DB || 'mysql',
-    logging: console.log // ← CAMBIADO A true para ver errores
+    logging: console.log
   }
 }
 
@@ -21,12 +21,6 @@ export const sequelize = new Sequelize(
   config.password,
   {
     ...config.options,
-    logging: console.log,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
+    logging: false
   }
 )

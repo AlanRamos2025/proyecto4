@@ -12,19 +12,15 @@ const Legend = () => {
 
 
 const Register = () => {
-  // Estados del formulario
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
-
-  // Manejar envío del formulario de registro
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      // Validación en el cliente
       if (!fullName || !email || !password || !confirmPassword) {
         toast.error('Complete todos los campos')
         setLoading(false)
@@ -71,11 +67,9 @@ const Register = () => {
       setEmail("")
       setPassword("")
       setConfirmPassword("")
-      // Redirigir al formulario de inicio de sesión después del registro
       navigate('/login')
 
     } catch {
-      // Capturar otros errores
     }
     finally {
       setLoading(false)
